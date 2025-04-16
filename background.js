@@ -25,28 +25,49 @@ function isBlockedTime() {
 
 // Update dynamic rule based on current time.
 function updateBlockingRule() {
-	if (isBlockedTime()) {
-		// During blocked hours, add the redirect rule.
-		chrome.declarativeNetRequest.updateDynamicRules(
-			{
-				addRules: [rule],
-				removeRuleIds: [],
-			},
-			() => {
-				console.log("Blocking rule added.");
+	chrome.declarativeNetRequest.getDynamicRules((existingRules) => {
+		const alreadyExists = existingRules.some((r) => r.id === RULE_ID);
+
+		if (isBlockedTime()) {
+			// During blocked hours, ensure it's added
+			const remove = alreadyExists ? [RULE_ID] : [];
+			chrome.declarativeNetRequest.updateDynamicRules(
+				{
+					addRules: [rule],
+					removeRuleIds: remove,
+				},
+				() => {
+					if (chrome.runtime.lastError) {
+						console.error(
+							"Error adding rule:",
+							chrome.runtime.lastError.message
+						);
+					} else {
+						console.log("Blocking rule added.");
+					}
+				}
+			);
+		} else {
+			// Outside block hours, remove the rule if it exists
+			if (alreadyExists) {
+				chrome.declarativeNetRequest.updateDynamicRules(
+					{ removeRuleIds: [RULE_ID] },
+					() => {
+						if (chrome.runtime.lastError) {
+							console.error(
+								"Error removing rule:",
+								chrome.runtime.lastError.message
+							);
+						} else {
+							console.log("Blocking rule removed.");
+						}
+					}
+				);
+			} else {
+				console.log("No blocking rule to remove.");
 			}
-		);
-	} else {
-		// Outside blocked hours, remove the rule.
-		chrome.declarativeNetRequest.updateDynamicRules(
-			{
-				removeRuleIds: [RULE_ID],
-			},
-			() => {
-				console.log("Blocking rule removed.");
-			}
-		);
-	}
+		}
+	});
 }
 
 // Schedule the next update based on block boundaries.
