@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "ShameBlock",
+  "version": "1.0",
+  "description": "Blocks Instagram during the night by showing a guilt-driven message.",
+  "permissions": [
+    "declarativeNetRequest",
+    "alarms"
+  ],
+  "host_permissions": [
+    "*://*.instagram.com/*",
+    "*://*.facebook.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["shameblock.html", "styles.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
