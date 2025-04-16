@@ -19,17 +19,14 @@ const rule = {
 // Returns true if the current time is within the blocked window (11 PM - 5 AM)
 function isBlockedTime() {
 	const hour = new Date().getHours();
-	// Adjust these boundaries as needed (here, 23 means 11 PM and 5 means 5 AM)
-	return hour >= 9 || hour < 17;
+	return hour >= 9 && hour < 17;
 }
 
-// Update dynamic rule based on current time.
 function updateBlockingRule() {
 	chrome.declarativeNetRequest.getDynamicRules((existingRules) => {
 		const alreadyExists = existingRules.some((r) => r.id === RULE_ID);
 
 		if (isBlockedTime()) {
-			// During blocked hours, ensure it's added
 			const remove = alreadyExists ? [RULE_ID] : [];
 			chrome.declarativeNetRequest.updateDynamicRules(
 				{
@@ -80,7 +77,7 @@ function scheduleNextAlarm() {
 			now.getFullYear(),
 			now.getMonth(),
 			now.getDate(),
-			5,
+			17,
 			0,
 			0,
 			0
